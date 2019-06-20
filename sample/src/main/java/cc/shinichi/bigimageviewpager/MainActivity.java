@@ -187,7 +187,7 @@ public class MainActivity extends AppCompatActivity {
         // 也可直接传入url List
         final List<String> imageList = new ArrayList<>();
         imageList.add(
-            "http://img2.weishoot.com/?4583B5ECE38DC1B27FD1269F4E70B7670C426883D16355F21B46193F75071C599A3E6AED54A235489F4C38835361546D7648065651316476F7E30592DAF1CD6C50358835D5DD10D029DA4A9C59B56C3EA48055CE4E0A7627AF8C90303A4D1FBC2D88218AB0F699E74425A61E5D9E2B378E199A2906934C52DAC2D3920C74DBAF34BD945EEA7E86AC72AF12CD00F1179846E1DA2926B782C1D2215DB087EFDE04A1C0F46B1352527F");
+            "http://o.cztvcloud.com/208/posts/2018/08/14/c14b37bd322d34c1ebbc4c6c8254b4d6.gif");
         imageList.add(
             "https://sacasnap.neusoft.com/snap-engine-file/image/obtain/1264c125-387e-4af0-a361-f26c3f7fd12e?tenantId=neusoft");
         imageList.add(

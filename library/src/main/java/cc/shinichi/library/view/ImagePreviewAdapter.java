@@ -4,8 +4,10 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.RequiresApi;
 import android.support.v4.view.PagerAdapter;
 import android.view.MotionEvent;
 import android.view.View;
@@ -157,6 +159,7 @@ public class ImagePreviewAdapter extends PagerAdapter {
         }
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR1)
     @SuppressLint("CheckResult") @NonNull @Override
     public Object instantiateItem(@NonNull ViewGroup container, final int position) {
         if (activity == null) {
@@ -284,25 +287,40 @@ public class ImagePreviewAdapter extends PagerAdapter {
                 loadImageSpec(imagePath, imageView, imageGif, progressBar);
             }
         } else {
-            Glide.with(activity).downloadOnly().load(url).addListener(new RequestListener<File>() {
-                @Override public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<File> target,
-                    boolean isFirstResource) {
-
-                    Glide.with(activity).downloadOnly().load(url).addListener(new RequestListener<File>() {
-                        @Override
-                        public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<File> target,
-                            boolean isFirstResource) {
-
+            if(!activity.isDestroyed()&&!activity.isFinishing()){
+                Glide.with(activity).downloadOnly().load(url).addListener(new RequestListener<File>() {
+                    @Override public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<File> target,
+                                                          boolean isFirstResource) {
+                        if(!activity.isDestroyed()&&!activity.isFinishing()){
                             Glide.with(activity).downloadOnly().load(url).addListener(new RequestListener<File>() {
-                                @Override public boolean onLoadFailed(@Nullable GlideException e, Object model,
-                                    Target<File> target, boolean isFirstResource) {
-                                    loadFailed(imageView, imageGif, progressBar, e);
+                                @Override
+                                public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<File> target,
+                                                            boolean isFirstResource) {
+                                    if(!activity.isDestroyed()&&!activity.isFinishing()){
+                                        Glide.with(activity).downloadOnly().load(url).addListener(new RequestListener<File>() {
+                                            @Override public boolean onLoadFailed(@Nullable GlideException e, Object model,
+                                                                                  Target<File> target, boolean isFirstResource) {
+                                                loadFailed(imageView, imageGif, progressBar, e);
+                                                return true;
+                                            }
+
+                                            @Override
+                                            public boolean onResourceReady(File resource, Object model, Target<File> target,
+                                                                           DataSource dataSource, boolean isFirstResource) {
+                                                loadSuccess(resource, imageView, imageGif, progressBar);
+                                                return true;
+                                            }
+                                        }).into(new FileTarget() {
+                                            @Override public void onLoadStarted(@Nullable Drawable placeholder) {
+                                                super.onLoadStarted(placeholder);
+                                            }
+                                        });
+                                    }
                                     return true;
                                 }
 
-                                @Override
-                                public boolean onResourceReady(File resource, Object model, Target<File> target,
-                                    DataSource dataSource, boolean isFirstResource) {
+                                @Override public boolean onResourceReady(File resource, Object model, Target<File> target,
+                                                                         DataSource dataSource, boolean isFirstResource) {
                                     loadSuccess(resource, imageView, imageGif, progressBar);
                                     return true;
                                 }
@@ -311,33 +329,22 @@ public class ImagePreviewAdapter extends PagerAdapter {
                                     super.onLoadStarted(placeholder);
                                 }
                             });
-                            return true;
                         }
+                        return true;
+                    }
 
-                        @Override public boolean onResourceReady(File resource, Object model, Target<File> target,
-                            DataSource dataSource, boolean isFirstResource) {
-                            loadSuccess(resource, imageView, imageGif, progressBar);
-                            return true;
-                        }
-                    }).into(new FileTarget() {
-                        @Override public void onLoadStarted(@Nullable Drawable placeholder) {
-                            super.onLoadStarted(placeholder);
-                        }
-                    });
-                    return true;
-                }
-
-                @Override
-                public boolean onResourceReady(File resource, Object model, Target<File> target, DataSource dataSource,
-                    boolean isFirstResource) {
-                    loadSuccess(resource, imageView, imageGif, progressBar);
-                    return true;
-                }
-            }).into(new FileTarget() {
-                @Override public void onLoadStarted(@Nullable Drawable placeholder) {
-                    super.onLoadStarted(placeholder);
-                }
-            });
+                    @Override
+                    public boolean onResourceReady(File resource, Object model, Target<File> target, DataSource dataSource,
+                                                   boolean isFirstResource) {
+                        loadSuccess(resource, imageView, imageGif, progressBar);
+                        return true;
+                    }
+                }).into(new FileTarget() {
+                    @Override public void onLoadStarted(@Nullable Drawable placeholder) {
+                        super.onLoadStarted(placeholder);
+                    }
+                });
+            }
         }
         container.addView(convertView);
         return convertView;
